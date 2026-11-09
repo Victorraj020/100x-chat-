@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0c0d10;
+  --surface: #131519;
+  --surface-hover: #191c22;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-subtle: rgba(255, 255, 255, 0.04);
+  --foreground: #f3f3ef;
+  --foreground-muted: #9fa4b0;
+  --accent: #e5e5e0;
+  --accent-muted: #525866;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Custom subtle scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0c0d10;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Audio wave pulse keyframe */
+@keyframes soundwave {
+  0%, 100% {
+    height: 4px;
+  }
+  50% {
+    height: 18px;
+  }
+}
+
+.soundwave-bar {
+  animation: soundwave 1.2s ease-in-out infinite;
+}
+
+.soundwave-bar:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.soundwave-bar:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+.soundwave-bar:nth-child(4) {
+  animation-delay: 0.1s;
+}
+
+.soundwave-bar:nth-child(5) {
+  animation-delay: 0.35s;
+}
