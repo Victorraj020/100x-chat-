@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: 100x-chat-backend
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: "pip install --upgrade pip && pip install -r requirements.txt"
+    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: LLM_PROVIDER
+        value: gemini
+      - key: LLM_MODEL
+        value: gemini-2.0-flash
+      - key: GEMINI_API_KEY
+        sync: false # Prompts you for your key in the Render dashboard
