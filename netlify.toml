@@ -1,11 +1,11 @@
 [build]
   base = "frontend"
-  publish = "frontend/.next"
+  publish = ".next"
   command = "npm run build"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
 [build.environment]
-  NODE_VERSION = "20"
+  NODE_VERSION = "22"
   NEXT_PUBLIC_API_URL = "https://one00x-chat-backend.onrender.com"
