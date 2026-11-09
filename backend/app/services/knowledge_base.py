@@ -195,6 +195,19 @@ KNOWLEDGE_CHUNKS: List[Dict[str, Any]] = [
         "tags": ["genai", "rag", "embeddings", "qiskit", "pennylane", "machine-learning"]
     },
     {
+        "id": "proj-chatbot-01",
+        "title": "AI Chatbot — Architecture & Tech Stack",
+        "category": "Projects",
+        "project": "AI Chatbot",
+        "content": (
+            "This AI Chatbot application itself is built as an interactive, context-aware voice agent and portfolio storytelling experience. "
+            "Frontend: Built with Next.js 16 (App Router), TypeScript, Tailwind CSS v4, Lucide icons, Framer Motion, and native Web Speech API for voice recognition and synthesis. Hosted on Netlify. "
+            "Backend: Built with Python and FastAPI, using Pydantic for validation, AsyncPG with pgvector (and in-memory cosine fallback) for RAG semantic search, and the Gemini API for grounded first-person reasoning. Hosted on Render Cloud. "
+            "Architecture: Features live cosine similarity source attribution, chapter-aware conversational memory, audio visualization, and strict hallucination prevention."
+        ),
+        "tags": ["chatbot", "architecture", "fastapi", "nextjs", "tech-stack", "voice-agent", "rag"]
+    },
+    {
         "id": "genai-philosophy-01",
         "title": "Approach to Generative AI Engineering",
         "category": "Engineering Decisions",

@@ -215,6 +215,18 @@ FOLLOW_UPS:
                 ]
             )
 
+        # 2b. How this chatbot / app is built
+        if any(w in q for w in ["chatbot made of", "chatbot built", "how is this built", "how this works", "tech stack", "what is this app", "architecture of this"]):
+            return (
+                "I designed and built this AI Voice Chatbot from scratch as a production RAG application. "
+                "The frontend is built with Next.js 16 (App Router), TypeScript, Tailwind CSS v4, and the Web Speech API for real-time speech recognition and voice synthesis, hosted on Netlify. "
+                "The backend is powered by Python and FastAPI, running on Render Cloud with an in-memory vector store computing cosine similarity over my portfolio knowledge base, and grounded by Gemini for reasoning.",
+                [
+                    "How does the RAG pipeline prevent hallucinations?",
+                    "Why did you choose FastAPI over a serverless backend?"
+                ]
+            )
+
         # 3. Follow-up: "tell me more" / "rewarding lesson" / "elaborate"
         if any(w in q for w in ["tell me more", "could you tell me more", "rewarding lesson", "most rewarding", "lesson from that"]):
             if "vic-nlp" in hist or "assistant" in hist or "context" in hist:
