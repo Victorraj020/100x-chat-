@@ -16,3 +16,4 @@ class StoryService:
         return None
 
 story_service = StoryService()
+

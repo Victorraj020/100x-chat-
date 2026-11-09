@@ -45,3 +45,4 @@ class StoryChapter(BaseModel):
     projects_featured: List[str]
     suggested_questions: List[str]
     quote: Optional[str] = None
+

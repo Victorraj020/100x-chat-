@@ -243,7 +243,7 @@ export default function Home() {
             </div>
 
             {/* Quick Overview Badges */}
-            <div className="mt-20 pt-10 border-t border-white/[0.06] grid grid-cols-2 sm:grid-cols-4 gap-6 text-left max-w-2xl w-full">
+            <div className="mt-20 pt-10 border-t border-white/[0.06] grid grid-cols-2 sm:grid-cols-3 gap-6 text-left max-w-2xl w-full">
               <div>
                 <span className="text-[11px] font-mono text-neutral-500 uppercase block mb-1">
                   Candidate
@@ -262,12 +262,7 @@ export default function Home() {
                 </span>
                 <span className="text-sm text-neutral-300 font-medium">QFoundry, Vic-NLP</span>
               </div>
-              <div>
-                <span className="text-[11px] font-mono text-neutral-500 uppercase block mb-1">
-                  Target Role
-                </span>
-                <span className="text-sm text-neutral-300 font-medium">Generative AI Engineer</span>
-              </div>
+
             </div>
           </div>
         ) : (

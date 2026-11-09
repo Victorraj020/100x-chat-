@@ -55,6 +55,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [voicePlaybackEnabled, setVoicePlaybackEnabled] = useState(true);
   const [expandedSourceId, setExpandedSourceId] = useState<string | null>(null);
+  const [micError, setMicError] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
@@ -86,8 +87,14 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
         };
 
         recognition.onerror = (event: any) => {
-          console.error("Speech recognition error:", event.error);
           setIsListening(false);
+          if (event.error === "not-allowed" || event.error === "permission-denied") {
+            setMicError("Microphone access denied. Please allow mic access in your browser settings and reload.");
+          } else if (event.error === "no-speech") {
+            setMicError(null); // silent, just stop
+          } else {
+            setMicError(`Voice error: ${event.error}`);
+          }
         };
 
         recognition.onend = () => {
@@ -122,10 +129,11 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
 
   const toggleListening = () => {
     if (!recognitionRef.current) {
-      alert("Speech recognition is not supported in this browser. Please use Chrome or Safari.");
+      setMicError("Speech recognition is not supported in this browser. Please use Chrome or Edge.");
       return;
     }
 
+    setMicError(null);
     if (isListening) {
       recognitionRef.current.stop();
       setIsListening(false);
@@ -474,6 +482,19 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
 
         {/* Input Bar */}
         <div className="p-4 border-t border-white/[0.08] bg-[#121418]">
+          {/* Mic permission error banner */}
+          {micError && (
+            <div className="flex items-center justify-between mb-3 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-300 text-xs">
+              <div className="flex items-center gap-2">
+                <MicOff size={13} />
+                <span>{micError}</span>
+              </div>
+              <button onClick={() => setMicError(null)} className="ml-2 text-red-400 hover:text-red-200">
+                <X size={13} />
+              </button>
+            </div>
+          )}
+
           {/* Live listening banner */}
           {isListening && (
             <div className="flex items-center justify-between mb-3 px-3 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs">

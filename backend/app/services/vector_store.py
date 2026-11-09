@@ -183,3 +183,4 @@ class VectorStore:
         return scored_chunks[:top_k]
 
 vector_store = VectorStore()
+

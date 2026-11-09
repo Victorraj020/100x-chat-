@@ -316,3 +316,4 @@ STORY_CHAPTERS: List[Dict[str, Any]] = [
         "quote": "I am a builder driven by curiosity. I learn by understanding, experiment by building, and grow by taking on problems I haven't solved before."
     }
 ]
+

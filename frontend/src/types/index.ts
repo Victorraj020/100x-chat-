@@ -36,3 +36,4 @@ export interface ChatResponse {
   chapter_context?: string;
   suggested_followups: string[];
 }
+

@@ -139,3 +139,4 @@ async def reingest_knowledge():
     vector_store.initialized = False
     await vector_store.initialize()
     return {"status": "reindexed", "records": len(vector_store.chunks)}
+

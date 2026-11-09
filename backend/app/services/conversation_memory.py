@@ -49,3 +49,4 @@ class ConversationMemory:
             del self.session_last_topics[session_id]
 
 conversation_memory = ConversationMemory()
+

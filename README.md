@@ -168,3 +168,4 @@ When connecting a production PostgreSQL database with the `pgvector` extension:
    - **Actively Learning**: Deeper mathematical foundations of ML, production LLM evaluation, multi-agent frameworks.
 3. **No Fabricated History**: Never invents employment history, company affiliations, metrics, or achievements.
 4. **Transparent Citations**: Interviewers can open the citation inspector on any message to verify the similarity score and original text snippet.
+

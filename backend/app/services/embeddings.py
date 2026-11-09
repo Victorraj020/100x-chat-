@@ -113,3 +113,4 @@ class EmbeddingService:
         return vec.tolist()
 
 embedding_service = EmbeddingService()
+
