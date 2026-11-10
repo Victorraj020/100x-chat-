@@ -309,7 +309,7 @@ export default function Home() {
 
       {/* Floating Bottom Quick Voice/Chat Drawer Trigger */}
       {hasStartedStory && (
-        <div className="fixed bottom-6 right-6 z-40 animate-in fade-in slide-in-from-bottom-4 duration-300">
+        <div className="fixed bottom-20 right-6 z-40 animate-in fade-in slide-in-from-bottom-4 duration-300">
           <button
             onClick={() => setIsChatOpen(true)}
             className="flex items-center gap-3 px-5 py-3 rounded-full bg-[#181a20] hover:bg-[#20232a] text-[#f5f5f2] border border-white/[0.15] shadow-2xl transition-all hover:scale-105 active:scale-95 group"
