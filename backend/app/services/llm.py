@@ -169,14 +169,25 @@ FOLLOW_UPS:
                 ]
             )
 
-        # 2. Greetings & Casual Small Talk
+        # 2. Greetings & Casual Small Talk (strictly full word matching)
         greeting_words = ["hi", "hello", "hey", "what's up", "whats up", "how are you", "how are u", "how is it going", "how's it going", "good morning", "good afternoon", "good evening", "sup"]
-        if any(w in q for w in greeting_words) and not any(w in q for w in ["qfoundry", "vic-nlp", "aurasync", "neurovoice", "project", "study", "career"]):
+        has_greeting = any(re.search(r'\b' + re.escape(w) + r'\b', q) for w in greeting_words)
+        if has_greeting and not any(w in q for w in ["qfoundry", "vic-nlp", "aurasync", "neurovoice", "project", "study", "career", "pressure", "history"]):
             return (
                 "Hey! Not much, just exploring new engineering challenges. How can I help you today?",
                 [
                     "Tell me about your background.",
                     "What projects have you built?"
+                ]
+            )
+
+        # 2b. High pressure / Stress / Tight deadlines
+        if any(w in q for w in ["pressure", "stress", "deadline", "urgent", "under pressure"]):
+            return (
+                "Under high pressure or tight deadlines, I stay calm by breaking the problem down into isolated fundamentals, prioritizing the critical path, and focusing on debugging root causes methodically.",
+                [
+                    "How do you push your boundaries and limits?",
+                    "What is your #1 superpower?"
                 ]
             )
 
