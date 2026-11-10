@@ -1,30 +1,17 @@
 import re
-import random
 from typing import List, Dict, Any, Tuple
 from ..config import settings
-from ..schemas import KnowledgeSource
 
-SYSTEM_PROMPT = """You are Victorraj, speaking naturally in the first person during a Generative AI Engineer interview/assessment.
+SYSTEM_PROMPT = """You are Victorraj, answering directly in the first person.
 
-## CORE IDENTITY:
-- Name: Victorraj.
-- Education: Currently pursuing an MSc in Computer Science after completing a BSc in Information Technology.
-- Mindset: A builder driven by curiosity. You learn by understanding the mechanics, experiment by building practical software, and grow by tackling problems you haven't solved before.
-- Philosophy: You don't always need a complete roadmap before starting. You prefer understanding underlying concepts over blindly copying tutorials.
-
-## COMMUNICATION STYLE:
-- Always speak naturally in first person ("I", "my").
-- Sound human, thoughtful, humble, conversational, and direct.
-- DO NOT speak like a database query or say things like "Regarding X:". Talk like you are in a friendly conversation with an interviewer.
-- Be concise (approx 50-100 words), focused on the user's specific question.
-- Seamlessly follow up if the user asks "tell me more", "how so?", "why?", or references previous topics.
-
-## PROJECTS YOU BUILT:
-- QFoundry (VS Code extension for quantum circuit visualization with Qiskit & React).
-- QFoundry npm (pure TypeScript independent simulation engine up to 16 qubits with zero dependencies).
-- Vic-NLP (local assistant with multi-layer context routing & Llama workflows).
-- AuraSync AI (full-stack fashion recommendations using Next.js, FastAPI, Supabase, Gemini).
-- NeuroVoice AI (exploratory voice Parkinson's risk screening concept with PennyLane QML — research concept, NOT medical).
+CRITICAL INSTRUCTIONS:
+- Answer ONLY what the user specifically asked. Be direct, natural, and concise.
+- If someone asks "What's your name?", reply simply: "My name is Victorraj."
+- If someone asks "Where do you live?", reply: "I'm based in India."
+- If someone asks "What did you study?", reply: "I completed my BSc in Information Technology and I am currently doing my MSc in Computer Science."
+- DO NOT dump your entire resume, philosophy, or background unless the user specifically asks for it.
+- Keep answers short and human: 1-3 sentences maximum.
+- Never use robotic prefixes like "Regarding X:".
 """
 
 class LLMService:
@@ -34,18 +21,15 @@ class LLMService:
         self._init_client()
 
     def _init_client(self):
-        # 1. Try modern google-genai SDK
         if settings.GEMINI_API_KEY:
             try:
                 from google import genai
                 self.client = genai.Client(api_key=settings.GEMINI_API_KEY)
                 self.provider = "gemini_new"
-                print("[LLMService] Initialized with modern google-genai client.")
                 return
             except Exception as e:
-                print(f"[LLMService] modern google-genai init failed: {e}")
+                pass
 
-            # 2. Try legacy google.generativeai SDK
             try:
                 import google.generativeai as legacy_genai
                 legacy_genai.configure(api_key=settings.GEMINI_API_KEY)
@@ -54,21 +38,18 @@ class LLMService:
                     system_instruction=SYSTEM_PROMPT
                 )
                 self.provider = "gemini_legacy"
-                print("[LLMService] Initialized with legacy google.generativeai client.")
                 return
             except Exception as e:
-                print(f"[LLMService] legacy google.generativeai init failed: {e}")
+                pass
 
-        # 3. Try OpenAI if configured
         if settings.OPENAI_API_KEY:
             try:
                 from openai import OpenAI
                 self.client = OpenAI(api_key=settings.OPENAI_API_KEY)
                 self.provider = "openai"
-                print("[LLMService] Initialized with OpenAI client.")
                 return
             except Exception as e:
-                print(f"[LLMService] OpenAI init failed: {e}")
+                pass
 
         self.provider = "fallback"
 
@@ -80,29 +61,25 @@ class LLMService:
         chapter_context: str = None
     ) -> Tuple[str, List[str]]:
         context_str = self._format_retrieved_context(retrieved_sources)
-        prompt = f"""RETRIEVED FACTS FROM MY PORTFOLIO:
+        prompt = f"""PORTFOLIO FACTS:
 {context_str}
 
-CHAPTER / CONTEXT:
-{chapter_context or 'General'}
-
-RECENT CONVERSATION HISTORY:
+CONVERSATION HISTORY:
 {conversation_history}
 
 INTERVIEWER:
 "{user_message}"
 
 INSTRUCTIONS:
-- Reply naturally in the first person as Victorraj.
-- Sound conversational, friendly, and practical.
-- Keep the response around 2-4 sentences unless detailed technical depth was specifically asked.
-- Provide 2 natural follow-up questions at the very end in this format:
+- Answer ONLY what was asked as Victorraj.
+- Be concise (1-2 sentences). Do not over-explain.
+- Output 2 short follow-up questions at the end:
 FOLLOW_UPS:
 - [Question 1]
 - [Question 2]
 """
 
-        # Generation via modern google.genai
+        # 1. Try Gemini New
         if self.provider == "gemini_new" and self.client:
             try:
                 from google.genai import types
@@ -111,24 +88,24 @@ FOLLOW_UPS:
                     contents=prompt,
                     config=types.GenerateContentConfig(
                         system_instruction=SYSTEM_PROMPT,
-                        temperature=0.7,
+                        temperature=0.5,
                     )
                 )
                 if response and response.text:
                     return self._parse_llm_output(response.text)
             except Exception as e:
-                print(f"[LLMService] google-genai generation error: {e}")
+                pass
 
-        # Generation via legacy google.generativeai
+        # 2. Try Gemini Legacy
         if self.provider == "gemini_legacy" and self.client:
             try:
                 response = self.client.generate_content(prompt)
                 if response and response.text:
                     return self._parse_llm_output(response.text)
             except Exception as e:
-                print(f"[LLMService] legacy generation error: {e}")
+                pass
 
-        # Generation via OpenAI
+        # 3. Try OpenAI
         if self.provider == "openai" and self.client:
             try:
                 response = self.client.chat.completions.create(
@@ -137,253 +114,221 @@ FOLLOW_UPS:
                         {"role": "system", "content": SYSTEM_PROMPT},
                         {"role": "user", "content": prompt}
                     ],
-                    temperature=0.7,
+                    temperature=0.5,
                 )
                 text = response.choices[0].message.content
                 if text:
                     return self._parse_llm_output(text)
             except Exception as e:
-                print(f"[LLMService] OpenAI generation error: {e}")
+                pass
 
-        # Conversational Persona Engine (Human-sounding multi-turn dialog)
-        return self._generate_conversational_persona_response(
-            user_message, retrieved_sources, conversation_history, chapter_context
-        )
+        # 4. Direct, crisp fallback responder
+        return self._generate_crisp_direct_response(user_message, retrieved_sources, conversation_history)
 
     def _format_retrieved_context(self, sources: List[Dict[str, Any]]) -> str:
         if not sources:
-            return "No specific documents retrieved."
-        formatted = []
-        for s in sources:
-            formatted.append(f"- [{s['id']}] {s['title']}: {s['content']}")
-        return "\n".join(formatted)
+            return ""
+        return "\n".join(f"- [{s['id']}] {s['title']}: {s['content']}" for s in sources)
 
     def _parse_llm_output(self, raw_text: str) -> Tuple[str, List[str]]:
         follow_ups = []
         if "FOLLOW_UPS:" in raw_text:
             parts = raw_text.split("FOLLOW_UPS:")
             main_text = parts[0].strip()
-            follow_up_lines = parts[1].strip().split("\n")
-            for line in follow_up_lines:
-                clean_line = line.strip().lstrip("-*123456789. ")
-                if clean_line:
-                    follow_ups.append(clean_line)
+            for line in parts[1].strip().split("\n"):
+                clean = line.strip().lstrip("-*123456789. ")
+                if clean:
+                    follow_ups.append(clean)
         else:
             main_text = raw_text.strip()
             follow_ups = [
-                "What was the hardest technical challenge in that project?",
-                "How do you see that tying into Generative AI engineering?"
+                "Tell me more about QFoundry.",
+                "What is your approach to Generative AI?"
             ]
         return main_text, follow_ups[:2]
 
-    def _generate_conversational_persona_response(
+    def _generate_crisp_direct_response(
         self,
         query: str,
         sources: List[Dict[str, Any]],
-        history: str,
-        chapter_context: str
+        history: str
     ) -> Tuple[str, List[str]]:
         """
-        Conversational Persona Engine:
-        Provides dynamic, natural, human responses with memory of the ongoing conversation,
-        avoiding repetitive templates, robotic prefixes, or looping answers.
+        Direct, precise answers that answer exactly what was asked without fluff.
         """
         q = query.strip().lower()
         hist = history.lower()
 
-        # 1. Greetings & Pleasantries
-        if q in ["hi", "hello", "hey", "hi there", "hello there", "good morning", "good afternoon"]:
+        # 1. Name
+        if any(w in q for w in ["your name", "ur name", "who are you", "what is your name", "whats your name"]):
             return (
-                "Hey! Great to meet you. I'm Victorraj. Feel free to ask me anything about my background, "
-                "my projects like QFoundry or Vic-NLP, or how I approach building full-stack and Generative AI systems.",
+                "My name is Victorraj.",
                 [
-                    "Tell me about yourself and your journey so far.",
+                    "What is your background?",
+                    "What projects have you built?"
+                ]
+            )
+
+        # 2. Greetings
+        if q in ["hi", "hello", "hey", "hi there", "hello there"]:
+            return (
+                "Hi! I'm Victorraj. How can I help you today?",
+                [
+                    "Tell me about your background.",
+                    "What projects have you built?"
+                ]
+            )
+
+        # 3. Location / Address / Where do you live
+        if any(w in q for w in ["address", "where do you live", "location", "where are you from", "where are you based"]):
+            return (
+                "I am based in India.",
+                [
+                    "What are you currently studying?",
+                    "What projects have you built?"
+                ]
+            )
+
+        # 4. Education / Studies / Degree
+        if any(w in q for w in ["study", "degree", "education", "college", "university", "msc", "bsc", "school"]):
+            return (
+                "I completed my BSc in Information Technology and I am currently pursuing my MSc in Computer Science.",
+                [
+                    "Why did you choose Computer Science?",
+                    "What projects have you built?"
+                ]
+            )
+
+        # 5. Background / Tell me about yourself
+        if any(w in q for w in ["tell me about yourself", "tell me about ur self", "your background", "introduce yourself"]):
+            return (
+                "I'm Victorraj, currently doing my MSc in Computer Science. I'm an aspiring AI Engineer and full-stack developer who enjoys building practical software, from quantum simulators in TypeScript to Generative AI systems.",
+                [
                     "Why did you build QFoundry?",
+                    "What is your approach to Generative AI engineering?"
                 ]
             )
 
-        # 2. Tell me about yourself / Name / Background
-        if any(w in q for w in ["your name", "ur name", "who are you", "tell me about yourself", "tell me about ur self", "introduce yourself", "your background"]):
-            return (
-                "My name is Victorraj. I completed my BSc in Information Technology and am currently pursuing an MSc in Computer Science. "
-                "I'm an aspiring AI Engineer and full-stack developer who loves exploring how systems work under the hood—from authoring quantum simulation engines in TypeScript to designing production RAG pipelines.",
-                [
-                    "Why did you decide to build QFoundry?",
-                    "What is your approach to Generative AI engineering?",
-                ]
-            )
-
-        # 2b. How this chatbot / app is built
-        if any(w in q for w in ["chatbot made of", "chatbot built", "how is this built", "how this works", "tech stack", "what is this app", "architecture of this"]):
-            return (
-                "I designed and built this AI Voice Chatbot from scratch as a production RAG application. "
-                "The frontend is built with Next.js 16 (App Router), TypeScript, Tailwind CSS v4, and the Web Speech API for real-time speech recognition and voice synthesis, hosted on Netlify. "
-                "The backend is powered by Python and FastAPI, running on Render Cloud with an in-memory vector store computing cosine similarity over my portfolio knowledge base, and grounded by Gemini for reasoning.",
-                [
-                    "How does the RAG pipeline prevent hallucinations?",
-                    "Why did you choose FastAPI over a serverless backend?"
-                ]
-            )
-
-        # 2c. Contact / Location / Personal details
-        if any(w in q for w in ["address", "where do you live", "location", "contact", "email", "phone", "hire", "reach you"]):
-            return (
-                "I'm based in India, currently completing my MSc in Computer Science. "
-                "You can connect with me and explore my work directly on GitHub at github.com/Victorraj020 or reach out for engineering opportunities!",
-                [
-                    "What kind of roles are you currently looking for?",
-                    "Tell me about your projects like QFoundry."
-                ]
-            )
-
-        # 3. Follow-up: "tell me more" / "rewarding lesson" / "elaborate"
-        if any(w in q for w in ["tell me more", "could you tell me more", "rewarding lesson", "most rewarding", "lesson from that"]):
-            if "vic-nlp" in hist or "assistant" in hist or "context" in hist:
+        # 6. What is QFoundry / Why did you build it
+        if "qfoundry" in q:
+            if any(w in q for w in ["npm", "simulator", "engine", "typescript", "without", "zero"]):
                 return (
-                    "The most rewarding lesson from Vic-NLP was realizing that a powerful model is only half the battle. "
-                    "The real intelligence comes from context engineering—routing the user's intent to the right knowledge layer "
-                    "so the model isn't hallucinating or answering in isolation. That realization is what steered me deeper into modern RAG pipelines.",
+                    "QFoundry npm is an independent quantum simulation engine I built from scratch in TypeScript with zero dependencies, capable of simulating up to 16 qubits.",
                     [
-                        "How did you implement context routing in Vic-NLP?",
-                        "What is your favorite project you've worked on so far?"
-                    ]
-                )
-            elif "qfoundry" in hist or "quantum" in hist:
-                return (
-                    "The biggest takeaway from QFoundry was learning not to be intimidated by unfamiliar math or systems. "
-                    "When I couldn't grasp quantum gates from tutorials alone, building the simulator gate-by-gate in TypeScript "
-                    "and computing the state vectors manually demystified the whole topic for me.",
-                    [
-                        "How did you build the QFoundry npm simulator without dependencies?",
-                        "What are you currently looking to improve in your engineering skills?"
-                    ]
-                )
-            elif "aurasync" in hist or "fashion" in hist:
-                return (
-                    "Building AuraSync taught me the discipline of product engineering. Connecting a model to an API is quick, "
-                    "but making an end-to-end web app with authentication, database state in Supabase, and multimodal image analysis "
-                    "requires disciplined API contract design between FastAPI and Next.js.",
-                    [
-                        "What tech stack did you use for AuraSync?",
-                        "How do you approach learning unfamiliar technologies?"
-                    ]
-                )
-            else:
-                return (
-                    "I find the most rewarding part of engineering is turning a personal frustration into a working tool. "
-                    "Whenever I run into something that feels like a 'black box', my instinct is to open it up, write code to simulate it, "
-                    "and build an application that makes it clear for myself and others.",
-                    [
-                        "Can you tell me about a time an approach failed?",
-                        "What kind of roles are you currently looking for?"
-                    ]
-                )
-
-        # 4. QFoundry / Quantum
-        if "qfoundry" in q or "quantum" in q:
-            if any(w in q for w in ["npm", "simulator", "engine", "typescript", "without", "dependency"]):
-                return (
-                    "QFoundry npm is an independent quantum simulation engine I wrote from scratch in TypeScript with zero external dependencies. "
-                    "While my VS Code extension relied on Qiskit, with the npm package I wanted to understand the underlying linear algebra: "
-                    "implementing complex numbers, tensor matrix products, and state-vector simulation capable of handling up to 16 qubits.",
-                    [
-                        "What was the hardest math challenge in building it?",
-                        "How does this relate to your interest in AI engineering?"
+                        "What was the hardest part of building it?",
+                        "How does it differ from Qiskit?"
                     ]
                 )
             return (
-                "I started QFoundry because when I began learning quantum computing, I felt like I was blindly copying algorithms without "
-                "visualizing what was happening to the quantum state. So I built a VS Code extension that renders interactive circuit diagrams, "
-                "step-by-step gate execution timelines, and phase visualizers using React and Qiskit.",
+                "QFoundry is a VS Code extension I built to visualize quantum circuits and state vectors in real time, built with React and Qiskit.",
                 [
-                    "How does your QFoundry npm package differ from the extension?",
-                    "What did you learn about developer tooling while building it?"
+                    "Why did you build it?",
+                    "Tell me about QFoundry npm."
                 ]
             )
 
-        # 5. Vic-NLP / Context / RAG
-        if "vic-nlp" in q or "rag" in q or "context" in q or "assistant" in q:
+        # 7. What is Vic-NLP
+        if "vic-nlp" in q or "vic nlp" in q:
             return (
-                "With Vic-NLP, I wanted to move beyond single-turn chat wrappers. I built a multi-layer context routing pipeline that "
-                "retrieves background knowledge and maintains conversational context before sending prompts to local Llama models. "
-                "It really shaped my current philosophy: building reliable AI is mostly about context management, retrieval, and evaluation.",
+                "Vic-NLP is a local AI assistant project I built in Python to explore multi-layer context routing and structured knowledge retrieval with local Llama models.",
                 [
-                    "What is your approach to RAG architectures?",
-                    "How do you minimize hallucinations in AI systems?"
+                    "How did you implement context routing?",
+                    "What did you learn from it?"
                 ]
             )
 
-        # 6. AuraSync / Full-Stack
-        if "aurasync" in q or "fashion" in q or "full-stack" in q or "full stack" in q:
+        # 8. What is AuraSync
+        if "aurasync" in q or "fashion" in q:
             return (
-                "AuraSync is an AI fashion recommendation app I built with Next.js, TypeScript, FastAPI, Supabase, and Gemini. "
-                "It was a great exercise in shipping a real product: handling image inputs, generating structured visual advice, "
-                "and managing user data securely.",
+                "AuraSync AI is a fashion recommendation web app built with Next.js, FastAPI, Supabase, and the Gemini API for visual and multimodal analysis.",
                 [
-                    "What was the biggest architectural decision you made on AuraSync?",
-                    "How did you integrate FastAPI with the Gemini API?"
+                    "What was your role in AuraSync?",
+                    "What tech stack did you use?"
                 ]
             )
 
-        # 7. NeuroVoice / Health
-        if "neurovoice" in q or "parkinson" in q or "voice" in q:
+        # 9. What is NeuroVoice
+        if "neurovoice" in q or "parkinson" in q:
             return (
-                "NeuroVoice AI was an exploratory research project where I tested machine learning and PennyLane quantum ML models "
-                "on acoustic voice features for Parkinson's disease risk screening. I always clarify that it's strictly an early research concept, "
-                "not a diagnostic tool, but it gave me great experience dealing with real-world noisy audio datasets.",
+                "NeuroVoice AI was an exploratory research project where I tested ML and PennyLane quantum ML models on acoustic voice features for Parkinson's risk screening.",
                 [
-                    "What quantum machine learning techniques did you experiment with?",
-                    "What did that project teach you about AI ethics?"
+                    "What was the research scope?",
+                    "What ML models did you use?"
                 ]
             )
 
-        # 7b. Career Ambition / Taking it further in career / Future
-        if any(w in q for w in ["career", "future", "goals", "further in your career", "where do you see yourself", "looking for"]):
+        # 10. How is this chatbot / app made
+        if any(w in q for w in ["chatbot made of", "chatbot built", "how is this built", "what is this app", "tech stack"]):
             return (
-                "My goal is to work as a Generative AI Engineer on impactful products. "
-                "I want to focus on designing complete AI systems—combining robust retrieval-augmented generation, thoughtful context management, "
-                "and system evaluation. Long term, I also want to explore the intersection of machine learning and quantum computing.",
+                "This chatbot is built with Next.js 16 and TypeScript on the frontend (hosted on Netlify), and FastAPI with an in-memory RAG vector store on the backend (hosted on Render).",
                 [
-                    "What specific areas of AI are you focusing on mastering next?",
-                    "What kind of team environment brings out your best work?"
+                    "How does the voice feature work?",
+                    "How does the RAG pipeline work?"
                 ]
             )
 
-        # 8. Strengths, Weaknesses, Growth
-        if any(w in q for w in ["strength", "weakness", "growth", "improve", "learning approach", "unfamiliar"]):
+        # 11. Career plans / Future / What are you looking for
+        if any(w in q for w in ["career", "future", "goals", "further in your career", "role", "looking for"]):
             return (
-                "My biggest strength is that I'm comfortable diving into unfamiliar technical domains and learning through experimentation. "
-                "Where I'm actively growing is deepening my mathematical ML foundations and getting better at production-grade AI system evaluation, "
-                "so I can measure model performance systematically rather than just checking whether an answer looks plausible.",
+                "I am looking for a role as a Generative AI Engineer or Full-Stack Developer where I can build and evaluate end-to-end AI applications.",
                 [
-                    "How do you handle a bug or architecture failure when you have no roadmap?",
-                    "What kind of team environment brings out your best work?"
+                    "What areas of AI are you focusing on?",
+                    "What are your core technical skills?"
                 ]
             )
 
-        # 9. Dynamic synthesis from top retrieved source without robotic prefixes
+        # 12. Strengths / Weaknesses
+        if any(w in q for w in ["strength", "weakness"]):
+            if "weakness" in q or "improve" in q or "grow" in q:
+                return (
+                    "I am actively working on deepening my mathematical ML theory and refining production-grade evaluation frameworks for LLMs.",
+                    [
+                        "What are your main strengths?",
+                        "How do you approach learning new technologies?"
+                    ]
+                )
+            return (
+                "My core strengths are independent learning, curiosity, hands-on building, and persistence when solving unfamiliar technical problems.",
+                [
+                    "What areas are you actively working to improve?",
+                    "Can you give an example of an unfamiliar problem you solved?"
+                ]
+            )
+
+        # 13. Follow-up: "tell me more" / "lesson"
+        if any(w in q for w in ["tell me more", "could you tell me more", "lesson", "rewarding"]):
+            if "vic-nlp" in hist:
+                return (
+                    "The key lesson was context engineering: a model is only as good as the context you feed it. Layered routing helped prevent hallucinations.",
+                    ["How does that connect to your RAG approach?", "Tell me about AuraSync."]
+                )
+            elif "qfoundry" in hist:
+                return (
+                    "The biggest takeaway was breaking down complex linear algebra into code step-by-step rather than relying on external libraries.",
+                    ["How does QFoundry npm work?", "What are your career goals?"]
+                )
+            return (
+                "I find I learn best by building practical tools to solve problems I face, rather than just reading documentation.",
+                ["What project are you most proud of?", "What are you working on next?"]
+            )
+
+        # 14. Fallback to top source content in 1 clean sentence
         if sources:
-            best = sources[0]
-            clean_content = best['content'].replace("\n", " ").strip()
-            # Truncate to first 2-3 sentences if long
-            sentences = re.split(r'(?<=[.!?]) +', clean_content)
-            summary = " ".join(sentences[:3])
+            clean = sources[0]['content'].replace("\n", " ").strip()
+            sentence = clean.split(". ")[0] + "."
             return (
-                f"{summary} That hands-on experience really reinforced my belief in building systems from first principles.",
+                sentence,
                 [
-                    f"What was the most rewarding lesson from {best.get('project') or 'that project'}?",
-                    "How do you plan to take that further in your career?"
+                    "Could you tell me more about that?",
+                    "What other projects have you built?"
                 ]
             )
 
-        # 10. Default natural statement
         return (
-            "I'm passionate about engineering systems that solve practical problems. "
-            "Whether that's writing simulation algorithms from scratch, designing RAG pipelines, or connecting full-stack web architectures, "
-            "I focus on understanding the core principles and building something that actually works.",
+            "I'm Victorraj. Feel free to ask me anything about my projects, technical stack, or background.",
             [
-                "What project are you most proud of?",
-                "What motivated you to specialize in Generative AI?"
+                "What projects have you built?",
+                "What is your background?"
             ]
         )
 
