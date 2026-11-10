@@ -199,12 +199,53 @@ FOLLOW_UPS:
                 ]
             )
 
-        # 5. Background / Tell me about yourself
-        if any(w in q for w in ["tell me about yourself", "tell me about ur self", "your background", "introduce yourself"]):
+        # 5. Background / Life story / Tell me about yourself
+        if any(w in q for w in ["life story", "your journey", "your story", "tell me about yourself", "tell me about ur self", "your background", "introduce yourself"]):
             return (
-                "I'm Victorraj, currently doing my MSc in Computer Science. I'm an aspiring AI Engineer and full-stack developer who enjoys building practical software, from quantum simulators in TypeScript to Generative AI systems.",
+                "After completing my BSc in Information Technology, I chose to pursue an MSc in Computer Science to understand how systems work from first principles. "
+                "I'm an independent builder at heart—when I struggled to understand quantum circuits, I built QFoundry to visualize them, then wrote a pure TypeScript simulation engine from scratch, and have since focused on building reliable Generative AI systems.",
                 [
-                    "Why did you build QFoundry?",
+                    "What’s your #1 superpower?",
+                    "What are the top 3 areas you’d like to grow in?"
+                ]
+            )
+
+        # 5b. #1 Superpower
+        if any(w in q for w in ["superpower", "super power", "#1 strength", "greatest strength", "best quality"]):
+            return (
+                "My #1 superpower is independent learning and fearless experimentation. I am completely comfortable entering unfamiliar domains without a roadmap, making mistakes, and figuring things out by building working software from scratch.",
+                [
+                    "How do you push your boundaries and limits?",
+                    "What are the top 3 areas you’d like to grow in?"
+                ]
+            )
+
+        # 5c. Top 3 areas to grow in
+        if any(w in q for w in ["areas you’d like to grow", "areas you'd like to grow", "areas to grow", "top 3 areas", "grow in", "want to grow"]):
+            return (
+                "The top 3 areas I want to grow in are: 1. Deepening my theoretical and mathematical foundations in machine learning. 2. Mastering production-grade evaluation and latency/hallucination benchmarking for AI systems. 3. Collaborating on large-scale distributed engineering systems.",
+                [
+                    "What misconception do your coworkers have about you?",
+                    "What is your #1 superpower?"
+                ]
+            )
+
+        # 5d. Misconception coworkers have
+        if any(w in q for w in ["misconception", "misunderstood", "coworkers", "colleagues", "think about you"]):
+            return (
+                "Because I enjoy diving deep into independent problem-solving and building systems on my own, people sometimes assume I prefer working in isolation. In reality, I thrive on collaborative architectural discussions, pair programming, and learning from other experienced engineers.",
+                [
+                    "How do you push your boundaries and limits?",
+                    "What kind of team brings out your best work?"
+                ]
+            )
+
+        # 5e. Pushing boundaries and limits
+        if any(w in q for w in ["push your boundaries", "push your limits", "boundaries and limits", "push boundaries", "comfort zone"]):
+            return (
+                "I push my boundaries by deliberately choosing problems where I don't know the solution beforehand. For example, building a 16-qubit quantum simulator in pure TypeScript forced me to learn complex-number linear algebra from scratch rather than taking the easy route of using existing frameworks.",
+                [
+                    "What was the hardest part of building QFoundry npm?",
                     "What is your approach to Generative AI engineering?"
                 ]
             )

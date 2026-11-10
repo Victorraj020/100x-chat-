@@ -86,6 +86,28 @@ KNOWLEDGE_CHUNKS: List[Dict[str, Any]] = [
         ),
         "tags": ["career", "genai", "motivation", "quantum", "ambition"]
     },
+    {
+        "id": "bio-06",
+        "title": "#1 Superpower and Pushing Boundaries",
+        "category": "Strengths",
+        "project": None,
+        "content": (
+            "My #1 superpower is independent learning and fearless experimentation: I am completely comfortable entering unfamiliar domains without a roadmap, making mistakes, and figuring things out by building working software. "
+            "I push my boundaries and limits by deliberately choosing projects outside my comfort zone where I don't know the solution beforehand, such as writing a zero-dependency 16-qubit quantum simulator in pure TypeScript from scratch."
+        ),
+        "tags": ["superpower", "boundaries", "limits", "learning", "experimentation"]
+    },
+    {
+        "id": "bio-07",
+        "title": "Workplace Collaboration & Coworker Misconceptions",
+        "category": "Working Style",
+        "project": None,
+        "content": (
+            "Common misconception: Because I am deeply self-driven and enjoy diving into independent problem-solving and building projects from scratch, people sometimes assume I prefer working in isolation. "
+            "In reality, I thrive on collaborative architectural discussions, pair programming, and learning from other experienced engineers on larger team initiatives."
+        ),
+        "tags": ["misconceptions", "collaboration", "teamwork", "coworkers", "communication"]
+    },
 
     # --- Category: Projects ---
     {
