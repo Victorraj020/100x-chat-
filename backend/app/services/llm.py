@@ -169,10 +169,11 @@ FOLLOW_UPS:
                 ]
             )
 
-        # 2. Greetings
-        if q in ["hi", "hello", "hey", "hi there", "hello there"]:
+        # 2. Greetings & Casual Small Talk
+        greeting_words = ["hi", "hello", "hey", "what's up", "whats up", "how are you", "how are u", "how is it going", "how's it going", "good morning", "good afternoon", "good evening", "sup"]
+        if any(w in q for w in greeting_words) and not any(w in q for w in ["qfoundry", "vic-nlp", "aurasync", "neurovoice", "project", "study", "career"]):
             return (
-                "Hi! I'm Victorraj. How can I help you today?",
+                "Hey! Not much, just exploring new engineering challenges. How can I help you today?",
                 [
                     "Tell me about your background.",
                     "What projects have you built?"
@@ -353,8 +354,8 @@ FOLLOW_UPS:
                 ["What project are you most proud of?", "What are you working on next?"]
             )
 
-        # 14. Fallback to top source content in 1 clean sentence
-        if sources:
+        # 14. Fallback only if the retrieved source has high confidence relevance
+        if sources and sources[0].get('similarity_score', 0) > 0.20:
             clean = sources[0]['content'].replace("\n", " ").strip()
             sentence = clean.split(". ")[0] + "."
             return (
@@ -365,11 +366,12 @@ FOLLOW_UPS:
                 ]
             )
 
+        # 15. Natural conversational fallback
         return (
-            "I'm Victorraj. Feel free to ask me anything about my projects, technical stack, or background.",
+            "I'm Victorraj. Feel free to ask me about my background, projects like QFoundry or Vic-NLP, or my approach to Generative AI engineering!",
             [
-                "What projects have you built?",
-                "What is your background?"
+                "What is your background?",
+                "What projects have you built?"
             ]
         )
 
