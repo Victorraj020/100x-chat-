@@ -61,6 +61,8 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
   const synthRef = useRef<SpeechSynthesis | null>(null);
+  const spokenTranscriptRef = useRef<string>("");
+  const handleSendMessageRef = useRef<(text?: string) => Promise<void>>(async () => {});
 
   // Initialize Speech Synthesis and Speech Recognition
   useEffect(() => {
@@ -78,12 +80,14 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
 
         recognition.onstart = () => {
           setIsListening(true);
+          spokenTranscriptRef.current = "";
         };
 
         recognition.onresult = (event: any) => {
           const transcript = Array.from(event.results)
             .map((result: any) => result[0].transcript)
             .join("");
+          spokenTranscriptRef.current = transcript;
           setInput(transcript);
         };
 
@@ -100,6 +104,12 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
 
         recognition.onend = () => {
           setIsListening(false);
+          const finalSpeech = spokenTranscriptRef.current.trim();
+          if (finalSpeech) {
+            spokenTranscriptRef.current = "";
+            // Auto-send immediately as soon as user stops speaking
+            handleSendMessageRef.current(finalSpeech);
+          }
         };
 
         recognitionRef.current = recognition;
@@ -152,9 +162,16 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
     if (isListening) {
       recognitionRef.current.stop();
       setIsListening(false);
+      const textToSubmit = spokenTranscriptRef.current.trim();
+      if (textToSubmit) {
+        spokenTranscriptRef.current = "";
+        handleSendMessage(textToSubmit);
+      }
     } else {
       // Stop any current speaking before listening
       stopSpeaking();
+      spokenTranscriptRef.current = "";
+      setInput("");
       recognitionRef.current.start();
     }
   };
@@ -207,6 +224,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
     if (!query || isLoading) return;
 
     setInput("");
+    spokenTranscriptRef.current = "";
     if (isListening && recognitionRef.current) {
       recognitionRef.current.stop();
     }
@@ -267,6 +285,10 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    handleSendMessageRef.current = handleSendMessage;
+  });
 
   const handleClearHistory = async () => {
     stopSpeaking();
@@ -524,7 +546,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
             <div className="flex items-center justify-between mb-3 px-3 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs">
               <div className="flex items-center gap-2">
                 <Radio size={14} className="animate-pulse" />
-                <span>Listening... Speak your question into your microphone</span>
+                <span>Listening... speak your question (sends automatically when you finish)</span>
               </div>
               <VoiceVisualizer isActive={true} color="bg-emerald-400" />
             </div>
