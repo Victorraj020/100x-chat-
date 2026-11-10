@@ -202,13 +202,11 @@ FOLLOW_UPS:
                 ]
             )
 
-        # 2. Tell me about yourself / Background
-        if any(w in q for w in ["tell me about yourself", "tell me about ur self", "who are you", "introduce yourself", "your background"]):
+        # 2. Tell me about yourself / Name / Background
+        if any(w in q for w in ["your name", "ur name", "who are you", "tell me about yourself", "tell me about ur self", "introduce yourself", "your background"]):
             return (
-                "I'm Victorraj. I completed my BSc in Information Technology and am currently pursuing an MSc in Computer Science. "
-                "Above all, I think of myself as a builder driven by curiosity. Instead of just learning how to use existing frameworks, "
-                "I like digging into how technologies work internally—which is what led me to build an independent quantum circuit simulator in TypeScript, "
-                "develop local AI assistants with context routing, and build full-stack GenAI web apps.",
+                "My name is Victorraj. I completed my BSc in Information Technology and am currently pursuing an MSc in Computer Science. "
+                "I'm an aspiring AI Engineer and full-stack developer who loves exploring how systems work under the hood—from authoring quantum simulation engines in TypeScript to designing production RAG pipelines.",
                 [
                     "Why did you decide to build QFoundry?",
                     "What is your approach to Generative AI engineering?",
@@ -336,6 +334,18 @@ FOLLOW_UPS:
                 [
                     "What quantum machine learning techniques did you experiment with?",
                     "What did that project teach you about AI ethics?"
+                ]
+            )
+
+        # 7b. Career Ambition / Taking it further in career / Future
+        if any(w in q for w in ["career", "future", "goals", "further in your career", "where do you see yourself", "looking for"]):
+            return (
+                "My goal is to work as a Generative AI Engineer on impactful products. "
+                "I want to focus on designing complete AI systems—combining robust retrieval-augmented generation, thoughtful context management, "
+                "and system evaluation. Long term, I also want to explore the intersection of machine learning and quantum computing.",
+                [
+                    "What specific areas of AI are you focusing on mastering next?",
+                    "What kind of team environment brings out your best work?"
                 ]
             )
 
