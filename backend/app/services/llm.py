@@ -227,6 +227,17 @@ FOLLOW_UPS:
                 ]
             )
 
+        # 2c. Contact / Location / Personal details
+        if any(w in q for w in ["address", "where do you live", "location", "contact", "email", "phone", "hire", "reach you"]):
+            return (
+                "I'm based in India, currently completing my MSc in Computer Science. "
+                "You can connect with me and explore my work directly on GitHub at github.com/Victorraj020 or reach out for engineering opportunities!",
+                [
+                    "What kind of roles are you currently looking for?",
+                    "Tell me about your projects like QFoundry."
+                ]
+            )
+
         # 3. Follow-up: "tell me more" / "rewarding lesson" / "elaborate"
         if any(w in q for w in ["tell me more", "could you tell me more", "rewarding lesson", "most rewarding", "lesson from that"]):
             if "vic-nlp" in hist or "assistant" in hist or "context" in hist:

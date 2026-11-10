@@ -51,6 +51,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
 
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingSeconds, setLoadingSeconds] = useState(0);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [voicePlaybackEnabled, setVoicePlaybackEnabled] = useState(true);
@@ -111,6 +112,20 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
       }
     };
   }, []);
+
+  // Timer while loading to inform user if cloud server is waking up
+  useEffect(() => {
+    let interval: any;
+    if (isLoading) {
+      setLoadingSeconds(0);
+      interval = setInterval(() => {
+        setLoadingSeconds((prev) => prev + 1);
+      }, 1000);
+    } else {
+      setLoadingSeconds(0);
+    }
+    return () => clearInterval(interval);
+  }, [isLoading]);
 
   // Handle incoming initial queries (e.g. clicking suggested question from story)
   useEffect(() => {
@@ -468,11 +483,20 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
                   Victorraj (AI Representation)
                 </span>
               </div>
-              <div className="bg-[#14161b] border border-white/[0.06] rounded-2xl rounded-tl-sm p-4 flex items-center gap-3">
-                <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                <span className="text-xs text-neutral-400 font-mono">
-                  Retrieving knowledge chunks & evaluating response...
-                </span>
+              <div className="bg-[#14161b] border border-white/[0.06] rounded-2xl rounded-tl-sm p-4 flex flex-col gap-1.5">
+                <div className="flex items-center gap-3">
+                  <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                  <span className="text-xs text-neutral-300 font-mono">
+                    {loadingSeconds >= 5
+                      ? `Waking up cloud server from standby (${loadingSeconds}s)...`
+                      : "Retrieving knowledge chunks & evaluating response..."}
+                  </span>
+                </div>
+                {loadingSeconds >= 5 && (
+                  <span className="text-[11px] text-neutral-500 pl-7">
+                    Free-tier cloud servers sleep during inactivity. First request takes ~30s to boot up. Subsequent replies will be instant!
+                  </span>
+                )}
               </div>
             </div>
           )}
