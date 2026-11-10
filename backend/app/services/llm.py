@@ -213,6 +213,14 @@ FOLLOW_UPS:
 
         # 5. Background / Life story / Tell me about yourself
         if any(w in q for w in ["life story", "your journey", "your story", "tell me about yourself", "tell me about ur self", "your background", "introduce yourself"]):
+            if "after completing my bsc" in hist or "independent builder at heart" in hist:
+                return (
+                    "To build on what I shared earlier, my practical work centers on developer tools and systems engineering: from authoring quantum simulators to designing context-routed RAG pipelines in Python and TypeScript. Which of my projects would you like to dive into?",
+                    [
+                        "Tell me about QFoundry.",
+                        "What is your approach to Generative AI engineering?"
+                    ]
+                )
             return (
                 "After completing my BSc in Information Technology, I chose to pursue an MSc in Computer Science to understand how systems work from first principles. "
                 "I'm an independent builder at heart—when I struggled to understand quantum circuits, I built QFoundry to visualize them, then wrote a pure TypeScript simulation engine from scratch, and have since focused on building reliable Generative AI systems.",
@@ -327,6 +335,56 @@ FOLLOW_UPS:
                 [
                     "What areas of AI are you focusing on?",
                     "What are your core technical skills?"
+                ]
+            )
+
+        # 11b. Why hire you / Why should we choose you
+        if any(w in q for w in ["why hire", "why should we hire", "why choose you", "why you"]):
+            return (
+                "You should hire me because I am a hands-on builder who learns by understanding first principles. I don't just connect API wrappers—I build practical developer tools from scratch and focus on engineering reliability, clean architecture, and continuous learning.",
+                [
+                    "What projects have you built?",
+                    "What is your #1 superpower?"
+                ]
+            )
+
+        # 11c. Handling failure / A time you failed
+        if any(w in q for w in ["failure", "failed", "mistake", "when something went wrong", "handle failure"]):
+            return (
+                "When an approach fails, I deconstruct why the fundamental assumption broke rather than applying quick patches. For example, when my initial multi-qubit tensor calculations failed in QFoundry npm, I went back to the linear algebra math and derived the matrix operations step-by-step until they were robust.",
+                [
+                    "Tell me about QFoundry npm.",
+                    "How do you push your boundaries and limits?"
+                ]
+            )
+
+        # 11d. Greatest achievement / Proud of
+        if any(w in q for w in ["achievement", "proud of", "greatest accomplishment", "best work"]):
+            return (
+                "Building and publishing QFoundry npm from scratch in TypeScript with zero dependencies. Simulating quantum state vectors up to 16 qubits without relying on external frameworks proved to me that I can master complex mathematical domains and deliver working tools.",
+                [
+                    "How does QFoundry npm work?",
+                    "What are your top 3 areas to grow in?"
+                ]
+            )
+
+        # 11e. Tech stack / Programming languages
+        if any(w in q for w in ["programming language", "languages do you know", "tech stack", "technologies do you know", "skills"]):
+            return (
+                "My primary languages are Python and TypeScript. On the frontend I work with React, Next.js, and Tailwind CSS; on the backend I build with FastAPI, Node.js, and vector databases like pgvector for RAG applications.",
+                [
+                    "What is your approach to Generative AI engineering?",
+                    "Tell me about AuraSync AI."
+                ]
+            )
+
+        # 11f. Learning approach
+        if any(w in q for w in ["how do you learn", "learning approach", "learning style", "pick up new"]):
+            return (
+                "I learn by building. Rather than passively following tutorials, I start with a project that forces me to use the technology, make mistakes, inspect the internals, and gradually figure out how it works from the ground up.",
+                [
+                    "Can you give an example of a project you learned this way?",
+                    "What is your #1 superpower?"
                 ]
             )
 
